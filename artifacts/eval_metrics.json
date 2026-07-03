@@ -1,0 +1,7 @@
+{
+  "test_auc": 0.7325,
+  "test_f1": 0.5434,
+  "test_recall": 0.6328,
+  "test_precision": 0.4761,
+  "test_accuracy": 0.6863
+}

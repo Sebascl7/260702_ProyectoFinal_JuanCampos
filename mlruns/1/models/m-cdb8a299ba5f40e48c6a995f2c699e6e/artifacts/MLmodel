@@ -1,0 +1,23 @@
+artifact_path: file:C:/Users/user01.MP27NGSV-SML/Videos/Sebastian/Troyano/SDC-MLOPS-2-01-main/SDC-MLOPS-2-01-main/ProyectoFinal_SebastianCampos/mlruns/1/models/m-cdb8a299ba5f40e48c6a995f2c699e6e/artifacts
+flavors:
+  python_function:
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.sklearn
+    model_path: model.skops
+    predict_fn: predict
+    python_version: 3.13.5
+  sklearn:
+    code: null
+    pickled_model: model.skops
+    serialization_format: skops
+    sklearn_version: 1.9.0
+    skops_trusted_types: null
+mlflow_version: 3.14.0
+model_id: m-cdb8a299ba5f40e48c6a995f2c699e6e
+model_size_bytes: 7017824
+model_uuid: m-cdb8a299ba5f40e48c6a995f2c699e6e
+prompts: null
+run_id: dfe3f13c4593498b896f00c02c7c0b87
+utc_time_created: '2026-07-03 01:15:21.145342'

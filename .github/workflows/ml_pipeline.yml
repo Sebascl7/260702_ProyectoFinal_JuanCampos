@@ -1,0 +1,61 @@
+# .github/workflows/ml_pipeline.yml — CI/CD Pipeline MLOps completo
+# Proyecto Final: Predicción de Abandono de Empleados
+# Autor: Sebastian Campos
+name: ML Pipeline CI/CD — Employee Attrition
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+env:
+  PYTHON_VERSION: '3.10'
+
+jobs:
+  ml-pipeline:
+    name: Pipeline MLOps Completo
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+      - name: Instalar dependencias
+        run: pip install -r requirements.txt
+      - name: Linting con flake8
+        run: flake8 . --max-line-length=100 --exclude=.git,__pycache__,mlruns,artifacts,data
+      - name: Etapa 1 — Descargar/generar dataset
+        run: python data/run.py
+      - name: Etapa 2 — Preprocesar datos
+        run: python preprocess/run.py
+      - name: Etapa 3 — Segregar train/test
+        run: python segregate/run.py
+      - name: Etapa 4 — Validar datos con pytest
+        run: pytest check_data/test_data.py -v --tb=short
+      - name: Etapa 5 — Entrenar Random Forest + MLflow
+        run: python random_forest/run.py
+      - name: Etapa 6 — Evaluar modelo (quality gate)
+        run: python evaluate/run.py
+      - name: Etapa 7 — Detección de drift
+        run: python drift/run.py
+      - name: Build imagen Docker de la API
+        run: docker build -t attrition-api:${{ github.sha }} -f serve/Dockerfile .
+      - name: Smoke test del contenedor
+        run: |
+          docker run -d --name api-test -p 8000:8000 attrition-api:${{ github.sha }}
+          sleep 15
+          curl -sf http://localhost:8000/health | python3 -m json.tool
+          docker stop api-test
+      - name: Subir artefactos
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+        uses: actions/upload-artifact@v4
+        with:
+          name: model-artifacts-${{ github.run_number }}
+          path: |
+            artifacts/modelo_attrition.pkl
+            artifacts/eval_metrics.json
+            reportes/
+          retention-days: 30
